@@ -1,12 +1,12 @@
-const productRouter = require("./product");
-const adminRouter = require('./admin');
-const siteRouter = require('./site');
+const adminRouter = require("./admin.route.js");
+const path = require("path");
+
 function route(app) {
-  app.use("/menu", productRouter);
-
-  app.use("/admin", adminRouter);
-
-  app.use("/", siteRouter);
+  app.use("/api/admin", adminRouter);
+  app.get("/uploads/:imageName", (req, res) => {
+    const imageName = req.params.imageName;
+    res.sendFile(path.join(__dirname, "..", "uploads", imageName));
+  });
 }
 
 module.exports = route;
