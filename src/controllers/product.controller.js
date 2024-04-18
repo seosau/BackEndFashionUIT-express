@@ -116,8 +116,16 @@ class ProductController {
         res.status(500).json({ message: "Cập nhật sản phẩm thất bại", error });
       });
   }
-
-  delete(req, res, next) {}
+  async delete(req, res, next) {
+    const { slug } = req.params;
+    await Product.deleteOne({ slug: slug })
+      .then((response) => {
+        response.status(200).json({ message: "Xoá sản phẩm thành công" });
+      })
+      .catch((error) => {
+        response.status(500).json({ error: "Xoá sản phẩm thất bại" });
+      });
+  }
 }
 
 module.exports = new ProductController();
