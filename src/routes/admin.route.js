@@ -12,5 +12,7 @@ router.get("/products", ProductController.index);
 // Route blog
 
 router.post("/blog/store", BlogController.store);
+router.get("/blog/:slug", BlogController.getBlogBySlug);
+router.put("/blog/update/:slug", BlogController.update);
 
 module.exports = router;

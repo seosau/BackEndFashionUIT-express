@@ -52,6 +52,29 @@ class BlogController {
         res.status(500).json({ error: "Đã xảy ra lỗi khi tạo bài viết" });
       });
   }
+  async getBlogBySlug(req, res, next) {
+    const { slug } = req.params;
+    const blog = await Blog.findOne({ slug: slug });
+    res.status(200).json(blog);
+  }
+  async update(req, res, next) {
+    const { slug } = req.params;
+    const blog = { ...req.body, slug: convertToSlug(req.body.title) };
+    const blogDescWithReplacedImages = await parseAndReplaceImages(
+      blog.description,
+      blog.slug
+    );
+    const blogDescWithReplacedImagesCleanedHtml =
+      blogDescWithReplacedImages.replace(/<\/?(html|head|body)>/gi, "");
+    blog.description = blogDescWithReplacedImagesCleanedHtml;
+    Blog.updateOne({ slug: slug }, blog)
+      .then((response) => {
+        res.status(200).json({ message: "Cập nhật tin tức thành công" });
+      })
+      .catch((error) => {
+        res.status(500).json({ message: "Cập nhật tin tức thất bại", error });
+      });
+  }
 }
 
 module.exports = new BlogController();
