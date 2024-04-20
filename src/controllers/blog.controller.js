@@ -31,6 +31,14 @@ const parseAndReplaceImages = async (html, fileName) => {
 };
 
 class BlogController {
+  async index(req, res, next) {
+    try {
+      const blogs = await Blog.find({});
+      res.status(200).json(blogs);
+    } catch (error) {
+      res.status(500).json({ message: "Có lỗi khi truy xuất bài viết" });
+    }
+  }
   async store(req, res, next) {
     const blog = { ...req.body, slug: convertToSlug(req.body.title) };
     const blogDescWithReplacedImages = await parseAndReplaceImages(
@@ -67,12 +75,22 @@ class BlogController {
     const blogDescWithReplacedImagesCleanedHtml =
       blogDescWithReplacedImages.replace(/<\/?(html|head|body)>/gi, "");
     blog.description = blogDescWithReplacedImagesCleanedHtml;
-    Blog.updateOne({ slug: slug }, blog)
+   await   Blog.updateOne({ slug: slug }, blog)
       .then((response) => {
         res.status(200).json({ message: "Cập nhật tin tức thành công" });
       })
       .catch((error) => {
         res.status(500).json({ message: "Cập nhật tin tức thất bại", error });
+      });
+  }
+  async delete(req, res, next) {
+    const { slug } = req.params;
+    await Blog.deleteOne({ slug: slug })
+      .then((response) => {
+        res.status(200).json({ success: "Xoá bài viết thành công" });
+      })
+      .catch((error) => {
+        res.status(500).json({ success: "Xoá bài viết không thành công" });
       });
   }
 }

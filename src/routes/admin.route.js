@@ -14,5 +14,7 @@ router.get("/products", ProductController.index);
 router.post("/blog/store", BlogController.store);
 router.get("/blog/:slug", BlogController.getBlogBySlug);
 router.put("/blog/update/:slug", BlogController.update);
+router.delete("/blog/delete/:slug", BlogController.delete);
+router.get("/blogs", BlogController.index);
 
 module.exports = router;
