@@ -1,5 +1,5 @@
 const Product = require("../models/product.model");
-const { convertToSlug } = require("../utils/generateSlug");
+const { convertToSlug, saveImageBase64ToDisk } = require("../utils");
 const fs = require("fs");
 const path = require("path");
 
@@ -31,22 +31,13 @@ class ProductController {
     if (!fs.existsSync(uploadDirectory)) {
       fs.mkdirSync(uploadDirectory);
     }
-
-    // Hàm lưu hình ảnh vào thư mục trên máy chủ và trả về đường dẫn của hình ảnh
-    function saveImageBase64ToDisk(base64String, fileName) {
-      const base64Data = base64String.replace(/^data:image\/\w+;base64,/, "");
-      const imageBuffer = Buffer.from(base64Data, "base64");
-      const imagePath = path.join(uploadDirectory, fileName);
-      fs.writeFileSync(imagePath, imageBuffer);
-      return imagePath;
-    }
-
     const productInfo = { ...req.body, slug: convertToSlug(req.body.name) };
     const preProduct = {
       ...productInfo,
       images: productInfo.images.map((image, index) => ({
         color: image.color,
         imgUrl: saveImageBase64ToDisk(
+          uploadDirectory,
           image.imgUrl,
           `${productInfo.slug}-${index}.jpg`
         ),
@@ -83,13 +74,6 @@ class ProductController {
     if (!fs.existsSync(uploadDirectory)) {
       fs.mkdirSync(uploadDirectory);
     }
-    function saveImageBase64ToDisk(base64String, fileName) {
-      const base64Data = base64String.replace(/^data:image\/\w+;base64,/, "");
-      const imageBuffer = Buffer.from(base64Data, "base64");
-      const imagePath = path.join(uploadDirectory, fileName);
-      fs.writeFileSync(imagePath, imageBuffer);
-      return imagePath;
-    }
     const { slug } = req.params;
     const editedProduct = { ...req.body, slug: convertToSlug(req.body.name) };
     const preProduct = {
@@ -100,6 +84,7 @@ class ProductController {
             return {
               color: image.color,
               imgUrl: saveImageBase64ToDisk(
+                uploadDirectory,
                 image.imgUrl,
                 `${editedProduct.slug}-${index}.jpg`
               ),
