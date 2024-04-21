@@ -111,6 +111,40 @@ class ProductController {
         response.status(500).json({ error: "Xoá sản phẩm thất bại" });
       });
   }
+  async searchProduct(req, res, next) {
+    try {
+      const products = await Product.aggregate([
+        [
+          {
+            $search: {
+              index: "clothes",
+              text: {
+                query: req.params.keyword,
+                path: {
+                  wildcard: "*",
+                },
+              },
+            },
+          },
+        ],
+      ]);
+      const updatedProducts = products.map((product) => {
+        const updatedImages = product.images.map((image) => ({
+          color: image.color,
+          imgUrl: `http://localhost:8000/uploads/${path.basename(
+            image.imgUrl
+          )}`,
+        }));
+        return {
+          ...product,
+          images: updatedImages,
+        };
+      });
+      res.status(200).json(updatedProducts);
+    } catch (error) {
+      res.status(500).json("failed to get the products");
+    }
+  }
 }
 
 module.exports = new ProductController();
