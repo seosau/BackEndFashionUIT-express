@@ -267,60 +267,24 @@ module.exports = {
       });
     }
   },
-  updateUserInfo: async (req, res) => {
+  checkAuth: async (req, res) => {
     try {
-      const { userId } = req.params;
-      const { isEdit } = req.body;
-      const existingUser = await User.findById(userId);
-      if (!existingUser) {
-        return res.status(404).send({
-          status: false,
-          message: "User not found",
-        });
+      const token = req.cookies.token;
+      console.log(token);
+      if (!token) {
+        return res.status(200).send({ isAuth: false, message: "You are unauthorized." });
       }
-      if (isEdit) {
-        Object.assign(existingUser, req.body);
-      } else {
-        const { firstName, lastName, phoneNumber, paymentMethod, avatar, address } = req.body;
-
-        Object.assign(existingUser, {
-          firstName,
-          lastName,
-          phoneNumber,
-          paymentMethod,
-          avatar,
-          firstTime: false,
-        });
-        existingUser.addresses.push(address);
-      }
-      const updatedUser = await existingUser.save();
-
-      return res.status(201).send({
-        status: true,
-        message: "User Account Updated Successfully!",
-        data: updatedUser,
+      jwt.verify(token, process.env.JWT_SECRET_KEY, (err, data) => {
+        if (err) {
+          return res.status(200).send({ isAuth: false, message: "You are unauthorized." });
+        }
+        decodedToken = jwt.decode(token);
+        return res.status(200).send({ isAuth: true, decodedToken, message: "You are authorized." });
       });
-    } catch (err) {
-      return res.status(500).send({
-        status: false,
-        error: err.message,
-      });
-    }
-  },
-
-  //get the user profile
-  getUserProfile: async (req, res) => {
-    try {
-      const userId = req.params.userId;
-
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      res.status(200).json({ user });
     } catch (error) {
-      res.status(500).json({ message: "Error retrieving the user profile" });
+      res.status(500).json({
+        message: "An error occurs while checking. Please try again later!",
+      });
     }
   },
 };
