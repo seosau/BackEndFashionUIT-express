@@ -9,8 +9,7 @@ exports.verifyToken = async (req, res, next) => {
     if (err) {
       return res.status(401).send({ message: "You are unauthorized." });
     }
-    req._id = data._id;
-
+    req._id = data.userId;
     next();
   });
 };

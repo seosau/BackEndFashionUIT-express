@@ -10,14 +10,6 @@ const userSchema = new Schema(
       type: String,
       default: null,
     },
-    firstName: {
-      type: String,
-      default: "",
-    },
-    lastName: {
-      type: String,
-      default: "",
-    },
     phoneNumber: {
       type: String,
       default: "",
