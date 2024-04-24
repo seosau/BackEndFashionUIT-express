@@ -103,12 +103,30 @@ class ProductController {
   }
   async delete(req, res, next) {
     const { slug } = req.params;
-    await Product.deleteOne({ slug: slug })
-      .then((response) => {
-        response.status(200).json({ message: "Xoá sản phẩm thành công" });
+    await Product.findOne({ slug: slug })
+      .then((product) => {
+        if (!product) {
+          return res.status(404).json({ error: "Sản phẩm không tồn tại" });
+        }
+        // Xoá từ cơ sở dữ liệu
+        Product.deleteOne({ slug: slug })
+          .then(() => {
+            // Xoá hình ảnh từ thư mục uploads
+            product.images.forEach((imagePath) => {
+              fs.unlink(imagePath.imgUrl, (err) => {
+                if (err) {
+                  console.error("Lỗi khi xoá hình ảnh:", err);
+                }
+              });
+            });
+            res.status(200).json({ message: "Xoá sản phẩm thành công" });
+          })
+          .catch((error) => {
+            res.status(500).json({ error: "Xoá sản phẩm thất bại" });
+          });
       })
       .catch((error) => {
-        response.status(500).json({ error: "Xoá sản phẩm thất bại" });
+        res.status(500).json({ error: "Lỗi khi truy vấn sản phẩm" });
       });
   }
   async searchProduct(req, res, next) {
@@ -143,6 +161,37 @@ class ProductController {
       res.status(200).json(updatedProducts);
     } catch (error) {
       res.status(500).json("failed to get the products");
+    }
+  }
+  async deleteSelectedProduct(req, res, next) {
+    const selectedArr = req.body;
+    for (let i = 0; i < selectedArr.length; i++) {
+      await Product.findOne({ slug: selectedArr[i] })
+
+        .then((product) => {
+          if (!product) {
+            return res.status(404).json({ error: "Sản phẩm không tồn tại" });
+          }
+          // Xoá từ cơ sở dữ liệu
+          Product.deleteOne({ slug: selectedArr[i] })
+            .then(() => {
+              // Xoá hình ảnh từ thư mục uploads
+              product.images.forEach((imagePath) => {
+                fs.unlink(imagePath.imgUrl, (err) => {
+                  if (err) {
+                    console.error("Lỗi khi xoá hình ảnh:", err);
+                  }
+                });
+              });
+              res.status(200).json({ message: "Xoá sản phẩm thành công" });
+            })
+            .catch((error) => {
+              res.status(500).json({ error: "Xoá sản phẩm thất bại" });
+            });
+        })
+        .catch((error) => {
+          res.status(500).json({ error: "Lỗi khi truy vấn sản phẩm" });
+        });
     }
   }
 }
