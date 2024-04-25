@@ -6,6 +6,7 @@ const ProductController = require("../controllers/product.controller");
 const BlogController = require("../controllers/blog.controller");
 const locationRouter = require("./location.route");
 const contactInfoRouter = require("./contact.route");
+const cartRouter = require("./cart.route");
 
 router.use("/location", locationRouter);
 router.use("/contact", contactInfoRouter);
@@ -17,4 +18,6 @@ router.get("/products", ProductController.index);
 router.get("/blogs", BlogController.index);
 // [GET] Lấy 1 bài viết
 router.get("/blog/:slug", BlogController.getBlogBySlug);
+router.use("/cart", verifyToken, cartRouter);   
+router.get("/getProductById/:id", ProductController.getProductById)
 module.exports = router;
