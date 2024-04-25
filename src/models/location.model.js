@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const { ObjectId } = Schema.Types; // Import ObjectId từ Schema.Types
-const Location = new Schema({
+const locationSchema = new Schema({
     _id: {type: ObjectId},
     city: {type: String},
     district: {type: String},
@@ -16,4 +16,4 @@ const Location = new Schema({
     updated_at: { type: Date, default: () => Date.now() },
 })
 
-module.exports = mongoose.model('Location', Location);
+module.exports = mongoose.model('Location', locationSchema);

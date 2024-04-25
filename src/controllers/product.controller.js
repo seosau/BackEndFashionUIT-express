@@ -163,6 +163,21 @@ class ProductController {
       res.status(500).json("failed to get the products");
     }
   }
+  
+  async getProductById(req, res, next) {
+    try {
+      const { id } = req.params;
+      const product = await Product.findById(id); 
+      product.images = product.images.map((image) => ({
+        color: image.color,
+        imgUrl: `http://localhost:8000/uploads/${path.basename(image.imgUrl)}`,
+      }));
+      res.status(200).json(product);
+    } catch (error) {
+      res.status(500).json({ error: "Đã xảy ra lỗi khi tìm sản phẩm" });
+    }
+  }
+
   async deleteSelectedProduct(req, res, next) {
     const selectedArr = req.body;
     for (let i = 0; i < selectedArr.length; i++) {
