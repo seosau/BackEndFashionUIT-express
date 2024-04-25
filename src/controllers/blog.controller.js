@@ -65,6 +65,28 @@ class BlogController {
     const blog = await Blog.findOne({ slug: slug });
     res.status(200).json(blog);
   }
+  async searchBlog(req, res, next) {
+    try {
+      const blogs = await Blog.aggregate([
+        [
+          {
+            $search: {
+              index: "blogs",
+              text: {
+                query: req.params.keyword,
+                path: {
+                  wildcard: "*",
+                },
+              },
+            },
+          },
+        ],
+      ]);
+      res.status(200).json(blogs);
+    } catch (error) {
+      res.status(500).json("failed to get the blogs");
+    }
+  }
   async update(req, res, next) {
     const { slug } = req.params;
     const blog = { ...req.body, slug: convertToSlug(req.body.title) };
@@ -75,7 +97,7 @@ class BlogController {
     const blogDescWithReplacedImagesCleanedHtml =
       blogDescWithReplacedImages.replace(/<\/?(html|head|body)>/gi, "");
     blog.description = blogDescWithReplacedImagesCleanedHtml;
-   await   Blog.updateOne({ slug: slug }, blog)
+    await Blog.updateOne({ slug: slug }, blog)
       .then((response) => {
         res.status(200).json({ message: "Cập nhật tin tức thành công" });
       })
@@ -92,6 +114,19 @@ class BlogController {
       .catch((error) => {
         res.status(500).json({ success: "Xoá bài viết không thành công" });
       });
+  }
+  async deleteSelectedBlogs(req, res, next) {
+    const selectedArr = req.body;
+    const deletionPromises = selectedArr.map((slug) => {
+      return Blog.deleteOne({ slug });
+    });
+
+    try {
+      await Promise.all(deletionPromises);
+      res.status(200).json({ success: "Xoá bài viết thành công" });
+    } catch (error) {
+      res.status(500).json({ error: "Xoá bài viết thất bại" });
+    }
   }
 }
 

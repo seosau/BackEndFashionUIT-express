@@ -1,4 +1,4 @@
-const User = require("../models/user");
+const User = require("../models/user.model.js");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
