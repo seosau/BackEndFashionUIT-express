@@ -40,14 +40,14 @@ class AccountController {
   }
   async deleteSelectedAccounts(req, res, next) {
     const selectedArr = req.body;
-    for (let i = 0; i < selectedArr.length; i++) {
-      await User.deleteOne({ email: selectedArr[i] })
-        .then((response) => {
-          res.status(200).json({ success: "Xoá tài khoản thành công" });
-        })
-        .catch((error) => {
-          res.status(500).json({ error: "Xoá tài khoản thất bại" });
-        });
+    const deletionPromises = selectedArr.map((email) => {
+      return User.deleteOne({ email });
+    });
+    try {
+      await Promise.all(deletionPromises);
+      res.status(200).json({ success: "Xoá tài khoản thành công" });
+    } catch (error) {
+      res.status(500).json({ error: "Xoá tài khoản thất bại" });
     }
   }
 }
