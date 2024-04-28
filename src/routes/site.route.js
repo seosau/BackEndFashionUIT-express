@@ -14,6 +14,9 @@ router.use("/contact", contactInfoRouter);
 router.get("/product/search/:keyword", ProductController.searchProduct);
 // [GET] Lấy tất cả sản phẩm
 router.get("/products", ProductController.index);
+// [GET] Lấy sản phẩm theo slug
+router.get("/product/detail/:slug", ProductController.getproductbyslug);
+
 // [GET] Lấy tất cả bài viết
 router.get("/blogs", BlogController.index);
 // [GET] Lấy 1 bài viết
