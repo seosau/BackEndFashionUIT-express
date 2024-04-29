@@ -11,6 +11,10 @@ const productSchema = new Schema(
       type: String,
       required: true,
     },
+    shortDesc: {
+      type: String,
+      required: true,
+    },
     price: {
       type: Number,
       required: true,
@@ -21,8 +25,8 @@ const productSchema = new Schema(
       fabricType: { type: String },
       categoryDetail: { type: String },
     },
-    color: { type: Array },
-    size: { type: Array },
+    colors: { type: Array },
+    sizes: { type: Array },
     stock: { type: Array },
     slug: {
       type: String,

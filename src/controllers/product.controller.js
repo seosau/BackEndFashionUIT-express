@@ -4,27 +4,72 @@ const fs = require("fs");
 const path = require("path");
 
 class ProductController {
+  // async index(req, res, next) {
+  //   try {
+  //     const products = await Product.find({});
+  //     const updatedProducts = products.map((product) => {
+  //       const updatedImages = product.images.map((image) => ({
+  //         color: image.color,
+  //         imgUrl: `http://localhost:8000/uploads/${path.basename(
+  //           image.imgUrl
+  //         )}`,
+  //       }));
+  //       return {
+  //         ...product.toObject(),
+  //         images: updatedImages,
+  //       };
+  //     });
+  //     res.json(updatedProducts);
+  //   } catch (err) {
+  //     console.error("Lỗi khi truy xuất sản phẩm:", err);
+  //     return next(err);
+  //   }
+  // }
   async index(req, res, next) {
     try {
-      const products = await Product.find({});
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+  
+      const startIndex = (page - 1) * limit;
+      const endIndex = page * limit;
+  
+      const products = await Product.find({}).skip(startIndex).limit(limit);
+      const totalProducts = await Product.countDocuments();
+  
+      const pagination = {
+        currentPage: page,
+        totalPages: Math.ceil(totalProducts / limit),
+        totalItems: totalProducts,
+        itemsPerPage: limit
+      };
+  
+      if (endIndex < totalProducts) {
+        pagination.nextPage = page + 1;
+      }
+  
+      if (startIndex > 0) {
+        pagination.prevPage = page - 1;
+      }
+  
       const updatedProducts = products.map((product) => {
         const updatedImages = product.images.map((image) => ({
           color: image.color,
-          imgUrl: `http://localhost:8000/uploads/${path.basename(
-            image.imgUrl
-          )}`,
+          imgUrl: `http://localhost:8000/uploads/${path.basename(image.imgUrl)}`,
         }));
         return {
           ...product.toObject(),
           images: updatedImages,
         };
       });
-      res.json(updatedProducts);
+  
+      res.json({ pagination, data: updatedProducts });
     } catch (err) {
       console.error("Lỗi khi truy xuất sản phẩm:", err);
       return next(err);
     }
   }
+  
+
   async store(req, res, next) {
     const controllersDirectory = path.join(__dirname, "..");
     const uploadDirectory = path.join(controllersDirectory, "uploads");
@@ -74,6 +119,7 @@ class ProductController {
     if (!fs.existsSync(uploadDirectory)) {
       fs.mkdirSync(uploadDirectory);
     }
+
     const { slug } = req.params;
     const editedProduct = { ...req.body, slug: convertToSlug(req.body.name) };
     const preProduct = {
@@ -93,6 +139,7 @@ class ProductController {
         }),
       ],
     };
+
     Product.updateOne({ slug: slug }, preProduct)
       .then((response) => {
         res.status(200).json({ message: "Cập nhật sản phẩm thành công" });
@@ -163,11 +210,11 @@ class ProductController {
       res.status(500).json("failed to get the products");
     }
   }
-  
+
   async getProductById(req, res, next) {
     try {
       const { id } = req.params;
-      const product = await Product.findById(id); 
+      const product = await Product.findById(id);
       product.images = product.images.map((image) => ({
         color: image.color,
         imgUrl: `http://localhost:8000/uploads/${path.basename(image.imgUrl)}`,
