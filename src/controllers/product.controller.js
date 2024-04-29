@@ -4,71 +4,78 @@ const fs = require("fs");
 const path = require("path");
 
 class ProductController {
-  // async index(req, res, next) {
-  //   try {
-  //     const products = await Product.find({});
-  //     const updatedProducts = products.map((product) => {
-  //       const updatedImages = product.images.map((image) => ({
-  //         color: image.color,
-  //         imgUrl: `http://localhost:8000/uploads/${path.basename(
-  //           image.imgUrl
-  //         )}`,
-  //       }));
-  //       return {
-  //         ...product.toObject(),
-  //         images: updatedImages,
-  //       };
-  //     });
-  //     res.json(updatedProducts);
-  //   } catch (err) {
-  //     console.error("Lỗi khi truy xuất sản phẩm:", err);
-  //     return next(err);
-  //   }
-  // }
   async index(req, res, next) {
     try {
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
-  
+      const { page, limit, keyword } = req.query;
+
       const startIndex = (page - 1) * limit;
       const endIndex = page * limit;
-  
-      const products = await Product.find({}).skip(startIndex).limit(limit);
-      const totalProducts = await Product.countDocuments();
-  
+
+      let products;
+      let totalProducts;
+
+      if (keyword !== "null") {
+        const regex = new RegExp(keyword, "i"); // Tạo biểu thức chính quy từ keyword, 'i' để không phân biệt chữ hoa chữ thường
+        products = await Product.find({
+          $or: [
+            { name: regex },
+            { description: regex },
+            { slug: regex },
+            { shortDesc: regex },
+            { sex: regex },
+          ],
+        })
+          .skip(startIndex)
+          .limit(limit);
+        totalProducts = await Product.countDocuments({
+          $or: [
+            { name: regex },
+            { description: regex },
+            { slug: regex },
+            { shortDesc: regex },
+            { sex: regex },
+          ],
+        });
+      } else {
+        // Nếu không có keyword, thực hiện truy vấn thông thường
+        products = await Product.find({}).skip(startIndex).limit(limit);
+        totalProducts = await Product.countDocuments();
+      }
+
       const pagination = {
         currentPage: page,
         totalPages: Math.ceil(totalProducts / limit),
         totalItems: totalProducts,
-        itemsPerPage: limit
+        itemsPerPage: limit,
       };
-  
+
       if (endIndex < totalProducts) {
         pagination.nextPage = page + 1;
       }
-  
+
       if (startIndex > 0) {
         pagination.prevPage = page - 1;
       }
-  
+
       const updatedProducts = products.map((product) => {
         const updatedImages = product.images.map((image) => ({
           color: image.color,
-          imgUrl: `http://localhost:8000/uploads/${path.basename(image.imgUrl)}`,
+          imgUrl: `http://localhost:8000/uploads/${path.basename(
+            image.imgUrl
+          )}`,
         }));
         return {
           ...product.toObject(),
           images: updatedImages,
         };
       });
-  
+
       res.json({ pagination, data: updatedProducts });
     } catch (err) {
       console.error("Lỗi khi truy xuất sản phẩm:", err);
       return next(err);
     }
   }
-  
 
   async store(req, res, next) {
     const controllersDirectory = path.join(__dirname, "..");
