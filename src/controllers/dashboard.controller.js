@@ -1,6 +1,7 @@
 const User = require("../models/user.model.js");
 const Order = require("../models/order.model.js");
 const Product = require("../models/product.model.js");
+const { ObjectId } = require("mongodb");
 const moment = require("moment");
 class DashboardController {
   async index(req, res, next) {
@@ -21,11 +22,23 @@ class DashboardController {
         res,
         next
       );
+      const statisticsProductPurchase = await this.statisticsProductPurchase(
+        req,
+        res,
+        next
+      );
+      const statisticalGrowthProfit = await this.statisticalGrowthProfit(
+        req,
+        res,
+        next
+      );
       res.json({
         topDealUsers,
         statisticalGrowthAccounts,
         statisticalGrowthProducts,
         statisticalGrowthRevenue,
+        statisticsProductPurchase,
+        statisticalGrowthProfit,
       });
     } catch (error) {
       console.error("Lỗi khi thực hiện thống kê:", error);
@@ -221,8 +234,128 @@ class DashboardController {
 
       // Return the result
       return {
-        number: totalRevenue.toLocaleString() + ',000đ',
+        number:
+          totalRevenue.toLocaleString("en-US").replace(/,/g, ".") + ".000đ",
         percentage: Math.round(percentageGrowth),
+        chartData: chartData,
+      };
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: "An error occurred" });
+    }
+  }
+  async statisticsProductPurchase(req, res, next) {
+    try {
+      // Query the database to get orders with product details
+      const orders = await Order.find().populate("products.product").exec();
+
+      // Initialize counters for each category
+      let maleCount = 0;
+      let femaleCount = 0;
+      let childCount = 0;
+
+      // Initialize an array to store the counts for each day of the week
+      const weeklyCounts = [
+        { name: "Sun", male: 0, female: 0, child: 0 },
+        { name: "Mon", male: 0, female: 0, child: 0 },
+        { name: "Tue", male: 0, female: 0, child: 0 },
+        { name: "Wed", male: 0, female: 0, child: 0 },
+        { name: "Thu", male: 0, female: 0, child: 0 },
+        { name: "Fri", male: 0, female: 0, child: 0 },
+        { name: "Sat", male: 0, female: 0, child: 0 },
+      ];
+
+      // Loop through orders to count products purchased by gender and age group
+      for (const order of orders) {
+        const dayOfWeek = moment(order.createdAt).format("ddd");
+        for (const product of order.products) {
+          // Get the product object by awaiting Product.findById
+          const currProduct = await Product.findById(product.productId).exec();
+          // Check if product exists and has a category
+          if (currProduct && currProduct.category) {
+            // Increment the corresponding count based on the category
+            const sex = currProduct.category.sex.toLowerCase();
+            if (sex === "nam") {
+              weeklyCounts.find((item) => item.name === dayOfWeek).male++;
+              maleCount++;
+            } else if (sex === "nữ") {
+              weeklyCounts.find((item) => item.name === dayOfWeek).female++;
+              femaleCount++;
+            } else if (sex === "trẻ em") {
+              weeklyCounts.find((item) => item.name === dayOfWeek).child++;
+              childCount++;
+            }
+          }
+        }
+      }
+
+      // Prepare data for male, female, and child categories
+      const data = [
+        { name: "male", value: maleCount, color: "#0088FE" },
+        { name: "female", value: femaleCount, color: "#00C49F" },
+        { name: "child", value: childCount, color: "#FFBB28" },
+      ];
+
+      // Return the result
+      return {
+        data: data,
+        chartData: weeklyCounts,
+      };
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+
+  async statisticalGrowthProfit(req, res, next) {
+    try {
+      // Query the database to get order creation dates and total prices
+      const orders = await Order.find({}, "createdAt totalPrice").exec();
+
+      // Initialize an object to store the revenue and profit for each day of the week
+      const weeklyData = {
+        Sun: { revenue: 0, profit: 0 },
+        Mon: { revenue: 0, profit: 0 },
+        Tue: { revenue: 0, profit: 0 },
+        Wed: { revenue: 0, profit: 0 },
+        Thu: { revenue: 0, profit: 0 },
+        Fri: { revenue: 0, profit: 0 },
+        Sat: { revenue: 0, profit: 0 },
+      };
+
+      // Loop through orders and sum up the total prices for each day of the week
+      orders.forEach((order) => {
+        const dayOfWeek = moment(order.createdAt).format("ddd");
+        weeklyData[dayOfWeek].revenue += order.totalPrice;
+      });
+
+      // Calculate total revenue
+      const totalRevenue = Object.values(weeklyData).reduce(
+        (acc, val) => acc + val.revenue,
+        0
+      );
+
+      // Calculate profit (assuming profit percentage is 5%)
+      const profitPercentage = 5;
+      Object.keys(weeklyData).forEach((dayOfWeek) => {
+        weeklyData[dayOfWeek].profit =
+          (weeklyData[dayOfWeek].revenue * profitPercentage) / 100;
+      });
+
+      // Calculate the percentage growth compared to the previous week
+      // For simplicity, let's assume we have data for 2 weeks
+      const previousWeekTotalRevenue = 20000; // Example previous week total revenue
+      const percentageGrowth =
+        ((totalRevenue - previousWeekTotalRevenue) / previousWeekTotalRevenue) *
+        100;
+
+      // Prepare chart data
+      const chartData = Object.keys(weeklyData).map((dayOfWeek) => ({
+        name: dayOfWeek,
+        profit: weeklyData[dayOfWeek].profit,
+      }));
+
+      // Return the result
+      return {
         chartData: chartData,
       };
     } catch (error) {
