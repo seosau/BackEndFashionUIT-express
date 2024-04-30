@@ -12,7 +12,7 @@ const verificationEmail = (verificationToken) => `<!DOCTYPE html>
         <h2 style="text-align: center; color: #333;">Xác thực Email</h2>
         <p style="font-size: 16px; color: #555; line-height: 1.6;">Bấm vào đây để xác thực email của bạn:</p>
         <div style="text-align: center; margin-top: 20px;">
-            <a href="http://localhost:8000/api/verify/${verificationToken}" style="background-color: #007bff; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 5px; display: inline-block;">Verify Email</a>
+            <a href="http://localhost:8000/api/auth/verify/${verificationToken}" style="background-color: #007bff; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 5px; display: inline-block;">Verify Email</a>
         </div>
         <p style="font-size: 14px; color: #888; margin-top: 20px; text-align: center;">Nếu người yêu cầu không phải là bạn, xin hãy bỏ qua email này.</p>
     </div>
