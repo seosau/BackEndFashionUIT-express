@@ -4,6 +4,7 @@ const ProductController = require("../controllers/product.controller");
 const BlogController = require("../controllers/blog.controller");
 const AccountController = require("../controllers/account.controller")
 const hourlySaleController = require('../controllers/hourlySale.controller')
+const DashboardController = require("../controllers/dashboard.controller")
 const { isAdmin } = require("../middlewares/isAdmin");
 // Route Product
 router.post("/product/store", isAdmin, ProductController.store);
@@ -27,4 +28,6 @@ router.delete("/account/delete/all", isAdmin, AccountController.deleteSelectedAc
 router.delete("/account/delete/:email", isAdmin, AccountController.delete)
 //
 router.post('/sale/add', isAdmin, hourlySaleController.store)
+// Route dashboard
+router.get('/dashboard', DashboardController.index.bind(DashboardController))
 module.exports = router;
