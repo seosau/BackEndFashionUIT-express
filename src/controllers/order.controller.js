@@ -3,8 +3,7 @@ const User = require("../models/user.model.js");
 const CartController = require("./cart.controller.js");
 const cartModel = require("../models/cart.model");
 const moment = require("moment");
-const { param } = require("../routes/order.route.js");
-const { response } = require("express");
+
 const sortObject = (obj) => {
   let sorted = {};
   let str = [];

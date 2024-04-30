@@ -3,6 +3,7 @@ const router = express.Router();
 const ProductController = require("../controllers/product.controller");
 const BlogController = require("../controllers/blog.controller");
 const AccountController = require("../controllers/account.controller")
+const DashboardController = require("../controllers/dashboard.controller")
 const { isAdmin } = require("../middlewares/isAdmin");
 // Route Product
 router.post("/product/store", isAdmin, ProductController.store);
@@ -24,5 +25,6 @@ router.get("/accounts", isAdmin,AccountController.index)
 router.get("/account/search/:keyword", isAdmin,AccountController.searchAccount)
 router.delete("/account/delete/all", isAdmin,AccountController.deleteSelectedAccounts)
 router.delete("/account/delete/:email", isAdmin,AccountController.delete)
-
+// Route dashboard
+router.get('/dashboard', DashboardController.index.bind(DashboardController))
 module.exports = router;
