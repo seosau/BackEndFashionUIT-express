@@ -4,6 +4,7 @@ const { verifyToken } = require("../middlewares/verifyToken");
 
 const ProductController = require("../controllers/product.controller");
 const BlogController = require("../controllers/blog.controller");
+const hourlySaleController = require('../controllers/hourlySale.controller')
 const locationRouter = require("./location.route");
 const contactInfoRouter = require("./contact.route");
 const cartRouter = require("./cart.route");
@@ -26,7 +27,10 @@ router.get("/blogs", BlogController.index);
 router.get("/blog/:slug", BlogController.getBlogBySlug);
 router.use("/cart", verifyToken, cartRouter);
 router.get("/getProductById/:id", ProductController.getProductById);
+router.get("/product/:slug", ProductController.getproductbyslug);
 router.use("/auth", authRouter);
 router.use("/user", verifyToken, userRouter);
 router.use("/order", verifyToken, orderRouter);
+
+router.get('/sale/get/:day', hourlySaleController.index)
 module.exports = router;
