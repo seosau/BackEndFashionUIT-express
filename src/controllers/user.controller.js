@@ -7,7 +7,7 @@ module.exports = {
       const { address } = req.body;
       const user = await User.findOne({ _id: userId });
       if (!user) {
-        res.status(404).json({ message: "This user does not exist" });
+        return res.status(404).json({ message: "This user does not exist" });
       }
       user.addresses.push(address);
       await user.save();
@@ -26,7 +26,7 @@ module.exports = {
       const userId = req._id;
       const user = await User.findOne({ _id: userId });
       if (!user) {
-        res.status(404).json({ message: "This user does not exist" });
+        return res.status(404).json({ message: "This user does not exist" });
       }
       return res.status(200).json({
         message: "Address send successful!",
@@ -44,7 +44,7 @@ module.exports = {
 
       const user = await User.findOne({ _id: userId });
       if (!user) {
-        res.status(404).json({ message: "This user does not exist" });
+        return res.status(404).json({ message: "This user does not exist" });
       }
       const { index } = req.body;
       user.addresses.splice(index, 1);
