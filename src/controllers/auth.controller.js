@@ -78,12 +78,12 @@ module.exports = {
       // Debugging statement to verify data
       console.log("New User Registered:", newUser);
       console.log();
-      res.status(200).json({
+      return res.status(200).json({
         message: "Registration successful!",
       });
     } catch (error) {
       console.log("Error during registration:", error); // Debugging statement
-      res.status(500).json({ message: "Error during registration" });
+      return res.status(500).json({ message: "Error during registration" });
     }
   },
   //endpoint to verify the email
@@ -104,7 +104,7 @@ module.exports = {
 
       return res.sendFile(path.join(__dirname, "../../public", "registationSuccess.html"));
     } catch (error) {
-      res.status(500).json({ message: "Email Verificatioion Failed" });
+      return res.status(500).json({ message: "Email Verificatioion Failed" });
     }
   },
 
@@ -148,17 +148,17 @@ module.exports = {
         };
       }
       res.cookie("token", token, cookieOptions);
-      res.status(200).json({ token });
+      return res.status(200).json({ token });
     } catch (error) {
-      res.status(500).json({ message: "Login Failed!" });
+      return res.status(500).json({ message: "Login Failed!" });
     }
   },
   logout: async (req, res) => {
     try {
       res.clearCookie("token");
-      res.status(200).json({ message: "Cookie Removed!" });
+      return res.status(200).json({ message: "Cookie Removed!" });
     } catch (error) {
-      res.status(500).json({ message: "Log out Failed!" });
+      return res.status(500).json({ message: "Log out Failed!" });
     }
   },
 
