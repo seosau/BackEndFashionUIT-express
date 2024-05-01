@@ -3,7 +3,6 @@ class CartController {
   async index(req, res, next) {
     try {
       const cartInfo = await cartModel.findOne({ userId: req._id });
-
       if (cartInfo) {
         if (cartInfo.products.length > 0) {
           res.status(200).json({
@@ -142,25 +141,26 @@ class CartController {
   }
 
   async updateQuantity(req, res, next) {
-    const { productId, color, size, quantity } = req.body;
-    const userId = req._id;
+    console.log(1);
+    // const { productId, color, size, quantity } = req.body;
+    // const userId = req._id;
 
-    const existingCart = await cartModel.findOne({ userId: userId });
+    // const existingCart = await cartModel.findOne({ userId: userId });
 
-    const indexProduct = existingCart.products.findIndex((product) => product.productId.toString() === productId.toString() && product.size === size && product.color === color);
-    existingCart.products[indexProduct].quantity = quantity;
-    existingCart
-      .save()
-      .then(() => {
-        res.status(200).json({
-          message: "Đã cập nhật số lượng",
-          quantity: existingCart.products[indexProduct].quantity,
-        });
-      })
-      .catch((err) => {
-        console.error("Đã có lỗi cập nhật số lượng ", err);
-        res.status(500).json({ error: "Đã xảy ra lỗi cập nhật số lượng" });
-      });
+    // const indexProduct = existingCart.products.findIndex((product) => product.productId.toString() === productId.toString() && product.size === size && product.color === color);
+    // existingCart.products[indexProduct].quantity = quantity;
+    // existingCart
+    //   .save()
+    //   .then(() => {
+    //     res.status(200).json({
+    //       message: "Đã cập nhật số lượng",
+    //       quantity: existingCart.products[indexProduct].quantity,
+    //     });
+    //   })
+    //   .catch((err) => {
+    //     console.error("Đã có lỗi cập nhật số lượng ", err);
+    //     res.status(500).json({ error: "Đã xảy ra lỗi cập nhật số lượng" });
+    //   });
   }
 }
 

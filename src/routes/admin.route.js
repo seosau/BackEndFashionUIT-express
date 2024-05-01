@@ -2,7 +2,9 @@ const express = require("express");
 const router = express.Router();
 const ProductController = require("../controllers/product.controller");
 const BlogController = require("../controllers/blog.controller");
-const AccountController = require("../controllers/account.controller")
+const AccountController = require("../controllers/account.controller");
+const OrderController = require("../controllers/order.controller");
+
 const { isAdmin } = require("../middlewares/isAdmin");
 // Route Product
 router.post("/product/store", isAdmin, ProductController.store);
@@ -14,15 +16,19 @@ router.get("/products", isAdmin, ProductController.index);
 // Route blog
 router.post("/blog/store", isAdmin, BlogController.store);
 router.get("/blog/:slug", isAdmin, BlogController.getBlogBySlug);
-router.put("/blog/update/:slug", isAdmin, BlogController.update); 
-router.get("/blog/search/:keyword", BlogController.searchBlog)
-router.delete("/blog/delete/all", isAdmin,BlogController.deleteSelectedBlogs)
+router.put("/blog/update/:slug", isAdmin, BlogController.update);
+router.get("/blog/search/:keyword", BlogController.searchBlog);
+router.delete("/blog/delete/all", isAdmin, BlogController.deleteSelectedBlogs);
 router.delete("/blog/delete/:slug", isAdmin, BlogController.delete);
 router.get("/blogs", isAdmin, BlogController.index);
 // Route account
-router.get("/accounts", isAdmin,AccountController.index)
-router.get("/account/search/:keyword", isAdmin,AccountController.searchAccount)
-router.delete("/account/delete/all", isAdmin,AccountController.deleteSelectedAccounts)
-router.delete("/account/delete/:email", isAdmin,AccountController.delete)
-
+router.get("/accounts", isAdmin, AccountController.index);
+router.get("/account/search/:keyword", isAdmin, AccountController.searchAccount);
+router.delete("/account/delete/all", isAdmin, AccountController.deleteSelectedAccounts);
+router.delete("/account/delete/:email", isAdmin, AccountController.delete);
+//Router order
+router.get("/orders", isAdmin, OrderController.index);
+router.get("/orders/search-by-user", isAdmin, OrderController.getByUserId);
+router.post("/orders/change-status", isAdmin, OrderController.changeStatus);
+router.delete("/orders/delete", isAdmin, OrderController.delete);
 module.exports = router;
