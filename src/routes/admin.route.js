@@ -3,6 +3,7 @@ const router = express.Router();
 const ProductController = require("../controllers/product.controller");
 const BlogController = require("../controllers/blog.controller");
 const AccountController = require("../controllers/account.controller")
+const hourlySaleController = require('../controllers/hourlySale.controller')
 const DashboardController = require("../controllers/dashboard.controller")
 const { isAdmin } = require("../middlewares/isAdmin");
 // Route Product
@@ -15,16 +16,18 @@ router.get("/products", isAdmin, ProductController.index);
 // Route blog
 router.post("/blog/store", isAdmin, BlogController.store);
 router.get("/blog/:slug", isAdmin, BlogController.getBlogBySlug);
-router.put("/blog/update/:slug", isAdmin, BlogController.update); 
+router.put("/blog/update/:slug", isAdmin, BlogController.update);
 router.get("/blog/search/:keyword", BlogController.searchBlog)
-router.delete("/blog/delete/all", isAdmin,BlogController.deleteSelectedBlogs)
+router.delete("/blog/delete/all", isAdmin, BlogController.deleteSelectedBlogs)
 router.delete("/blog/delete/:slug", isAdmin, BlogController.delete);
 router.get("/blogs", isAdmin, BlogController.index);
 // Route account
-router.get("/accounts", isAdmin,AccountController.index)
-router.get("/account/search/:keyword", isAdmin,AccountController.searchAccount)
-router.delete("/account/delete/all", isAdmin,AccountController.deleteSelectedAccounts)
-router.delete("/account/delete/:email", isAdmin,AccountController.delete)
+router.get("/accounts", isAdmin, AccountController.index)
+router.get("/account/search/:keyword", isAdmin, AccountController.searchAccount)
+router.delete("/account/delete/all", isAdmin, AccountController.deleteSelectedAccounts)
+router.delete("/account/delete/:email", isAdmin, AccountController.delete)
+//
+router.post('/sale/add', isAdmin, hourlySaleController.store)
 // Route dashboard
 router.get('/dashboard', DashboardController.index.bind(DashboardController))
 module.exports = router;
