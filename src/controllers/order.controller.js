@@ -41,31 +41,25 @@ module.exports = {
       }
 
       for (var i = 0; i < orderInfo.products.length; i++) {
-        console.log(1);
         const currentDate = new Date();
-        const currentDay = currentDate.getDate();
-        const currentMonth = currentDate.getMonth() + 1;
-        const currentYear = currentDate.getFullYear();
-        const currentDateString = `${currentYear}-${currentMonth < 10 ? "0" + currentMonth : currentMonth}-${currentDay < 10 ? "0" + currentDay : currentDay}`;
-        console.log(2);
         const productId = orderInfo.products[i].productId;
         const color = orderInfo.products[i].color;
         const size = orderInfo.products[i].size;
-        console.log(productId);
         const product = await Product.findOne({ _id: productId });
-        const hourlySales = await HourlySale.find({ productId: "66233ca60c27fe410480f1c9" });
-        console.log(hourlySales);
+        const hourlySales = await HourlySale.find({ productId: productId });
         hourlySales?.forEach((hourlySale, index) => {
-          if (currentDateString === hourlySale.saleDay.substring(0, 10)) {
-            console.log(hourlySales);
-            console.log("Hai ngày là giống nhau.");
-          } else {
-            console.log("Hai ngày không giống nhau.");
-            console.log(hourlySales);
+          if (
+            currentDate.getDate() === hourlySale.saleDay.getDate() &&
+            currentDate.getMonth() === hourlySale.saleDay.getMonth() &&
+            currentDate.getFullYear() === hourlySale.saleDay.getFullYear() &&
+            currentDate.getUTCHours() + 7 < hourlySale.saleHour + 6 &&
+            currentDate.getUTCHours() + 7 >= hourlySale.saleHour
+          ) {
+            hourlySale.saleCount = hourlySale.saleCount + orderInfo.products[i].quantity;
+            hourlySale.save();
           }
         });
 
-        console.log(a);
         product.stock.forEach((item, index) => {
           if (item.color === color && item.size === size) {
             product.stock[index] = { ...product.stock[index], quantity: product.stock[index].quantity - orderInfo.products[i].quantity };
@@ -73,10 +67,10 @@ module.exports = {
         });
         product.sold = product.sold + orderInfo.products[i].quantity;
         await product.save();
-
         const indexProduct = existingCart.products.findIndex((product) => product.productId.toString() === productId.toString() && product.size === size && product.color === color);
         existingCart.products.splice(indexProduct, 1);
       }
+
       await existingCart.save();
       newOrder.expireAt = null;
       await newOrder.save();
@@ -107,13 +101,23 @@ module.exports = {
         });
       }
       for (var i = 0; i < orderInfo.products.length; i++) {
+        const currentDate = new Date();
         const productId = orderInfo.products[i].productId;
         const color = orderInfo.products[i].color;
         const size = orderInfo.products[i].size;
         const product = await Product.findOne({ _id: productId });
-        product.stock.forEach((item, index) => {
-          if (item.color === color && item.size === size) {
-            product.stock[index] = { ...product.stock[index], quantity: product.stock[index].quantity - orderInfo.products[i].quantity };
+        const hourlySales = await HourlySale.find({ productId: productId });
+        hourlySales?.forEach((hourlySale, index) => {
+          if (
+            currentDate.getDate() === hourlySale.saleDay.getDate() &&
+            currentDate.getMonth() === hourlySale.saleDay.getMonth() &&
+            currentDate.getFullYear() === hourlySale.saleDay.getFullYear() &&
+            currentDate.getUTCHours() + 7 < hourlySale.saleHour + 6 &&
+            currentDate.getUTCHours() + 7 >= hourlySale.saleHour
+          ) {
+            hourlySale.saleCount = hourlySale.saleCount + orderInfo.products[i].quantity;
+
+            hourlySale.save();
           }
         });
         product.sold = product.sold + orderInfo.products[i].quantity;
