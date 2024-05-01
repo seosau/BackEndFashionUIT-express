@@ -54,16 +54,10 @@ class CartController {
           });
       } else {
         const existingProduct = existingCart.products.findIndex(
-          (product) =>
-            product.productId.toString() ===
-              cartInfo.products.productId.toString() &&
-            product.size === cartInfo.products.size &&
-            product.color === cartInfo.products.color
+          (product) => product.productId.toString() === cartInfo.products.productId.toString() && product.size === cartInfo.products.size && product.color === cartInfo.products.color
         );
         if (existingProduct !== -1) {
-          existingCart.products[existingProduct].quantity += parseInt(
-            cartInfo.products.quantity
-          );
+          existingCart.products[existingProduct].quantity += parseInt(cartInfo.products.quantity);
           existingCart
             .save()
             .then(() => {
@@ -78,8 +72,7 @@ class CartController {
             });
         } else {
           existingCart.products.push(cartInfo.products);
-          existingCart.totalPrice +=
-            cartInfo.products.price * cartInfo.products.quantity;
+          existingCart.totalPrice += cartInfo.products.price * cartInfo.products.quantity;
           existingCart
             .save()
             .then(() => {
@@ -107,12 +100,7 @@ class CartController {
 
       const existingCart = await cartModel.findOne({ userId: userId });
 
-      const indexProduct = existingCart.products.findIndex(
-        (product) =>
-          product.productId.toString() === productId.toString() &&
-          product.size === size &&
-          product.color === color
-      );
+      const indexProduct = existingCart.products.findIndex((product) => product.productId.toString() === productId.toString() && product.size === size && product.color === color);
 
       existingCart.products.splice(indexProduct, 1);
       existingCart
@@ -125,9 +113,7 @@ class CartController {
         })
         .catch((err) => {
           console.error("Đã có lỗi khi xóa khỏi giỏ ", err);
-          return res
-            .status(500)
-            .json({ error: "Đã xảy ra lỗi khi xóa khỏi giỏ" });
+          return res.status(500).json({ error: "Đã xảy ra lỗi khi xóa khỏi giỏ" });
         });
     } catch (err) {
       console.error("Đã có lỗi khi xóa khỏi giỏ ", err);
@@ -149,9 +135,7 @@ class CartController {
         })
         .catch((err) => {
           console.error("Đã có lỗi khi xóa khỏi giỏ ", err);
-          return res
-            .status(500)
-            .json({ error: "Đã xảy ra lỗi khi xóa khỏi giỏ" });
+          return res.status(500).json({ error: "Đã xảy ra lỗi khi xóa khỏi giỏ" });
         });
     } catch (err) {
       console.error("Đã có lỗi khi xóa khỏi giỏ ", err);
@@ -160,18 +144,12 @@ class CartController {
   }
 
   async updateQuantity(req, res, next) {
-    console.log(1);
-    // const { productId, color, size, quantity } = req.body;
-    // const userId = req._id;
+    const { productId, color, size, quantity } = req.body;
+    const userId = req._id;
 
-    // const existingCart = await cartModel.findOne({ userId: userId });
+    const existingCart = await cartModel.findOne({ userId: userId });
 
-    const indexProduct = existingCart.products.findIndex(
-      (product) =>
-        product.productId.toString() === productId.toString() &&
-        product.size === size &&
-        product.color === color
-    );
+    const indexProduct = existingCart.products.findIndex((product) => product.productId.toString() === productId.toString() && product.size === size && product.color === color);
     existingCart.products[indexProduct].quantity = quantity;
     existingCart
       .save()
