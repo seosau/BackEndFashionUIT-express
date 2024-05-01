@@ -12,6 +12,10 @@ const HourlySaleSchema = new mongoose.Schema({
     saleCount: {
         type: Number,
         default: 0
+    },
+    discountPercent: {
+        type: Number,
+        default: 0
     }
 });
 
