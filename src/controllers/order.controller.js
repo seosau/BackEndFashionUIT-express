@@ -1,5 +1,7 @@
 const Order = require("../models/order.model.js");
 const User = require("../models/user.model.js");
+const Product = require("../models/product.model.js");
+
 const CartController = require("./cart.controller.js");
 const cartModel = require("../models/cart.model");
 const moment = require("moment");
@@ -37,17 +39,26 @@ module.exports = {
           message: "Cart not exist!",
         });
       }
+
       for (var i = 0; i < orderInfo.products.length; i++) {
         const productId = orderInfo.products[i].productId;
         const color = orderInfo.products[i].color;
         const size = orderInfo.products[i].size;
+        const product = await Product.findOne({ _id: productId });
+        product.stock.forEach((item, index) => {
+          if (item.color === color && item.size === size) {
+            product.stock[index] = { ...product.stock[index], quantity: product.stock[index].quantity - orderInfo.products[i].quantity };
+          }
+        });
+        product.sold = product.sold + orderInfo.products[i].quantity;
+        await product.save();
+
         const indexProduct = existingCart.products.findIndex((product) => product.productId.toString() === productId.toString() && product.size === size && product.color === color);
         existingCart.products.splice(indexProduct, 1);
       }
       await existingCart.save();
       newOrder.expireAt = null;
       await newOrder.save();
-      console.log("success");
       return res.status(200).json({
         message: "Order created successful!",
       });
@@ -78,6 +89,15 @@ module.exports = {
         const productId = orderInfo.products[i].productId;
         const color = orderInfo.products[i].color;
         const size = orderInfo.products[i].size;
+        const product = await Product.findOne({ _id: productId });
+        product.stock.forEach((item, index) => {
+          if (item.color === color && item.size === size) {
+            product.stock[index] = { ...product.stock[index], quantity: product.stock[index].quantity - orderInfo.products[i].quantity };
+          }
+        });
+        product.sold = product.sold + orderInfo.products[i].quantity;
+        await product.save();
+
         const indexProduct = existingCart.products.findIndex((product) => product.productId.toString() === productId.toString() && product.size === size && product.color === color);
         existingCart.products.splice(indexProduct, 1);
       }
@@ -257,7 +277,6 @@ module.exports = {
   getOrder: async (req, res) => {
     try {
       const orderId = req.query.orderId;
-      console.log(orderId);
       const order = await Order.findOne({ _id: orderId });
       if (!order) {
         return res.status(404).json({ message: "This order not exist!" });
@@ -270,6 +289,119 @@ module.exports = {
       return res.status(500).json({
         message: "An error occurs while quering order. Please try again later!",
       });
+    }
+  },
+  index: async (req, res, next) => {
+    try {
+      const { page, limit, userId } = req.query;
+      const startIndex = (page - 1) * limit;
+      const endIndex = page * limit;
+
+      let orders;
+      let totalOrders;
+
+      orders = await Order.find({}).skip(startIndex).limit(limit);
+      totalOrders = await Order.countDocuments();
+
+      const pagination = {
+        currentPage: page,
+        totalPages: Math.ceil(totalOrders / limit) > 0 ? Math.ceil(totalOrders / limit) : 1,
+        totalItems: totalOrders,
+        itemsPerPage: limit,
+      };
+
+      if (endIndex < totalOrders) {
+        pagination.nextPage = page + 1;
+      }
+
+      if (startIndex > 0) {
+        pagination.prevPage = page - 1;
+      }
+
+      res.json({ pagination, data: orders });
+    } catch (err) {
+      console.error("Lỗi khi truy xuất đơn hàng:", err);
+      return next(err);
+    }
+  },
+  getByUserId: async (req, res, next) => {
+    try {
+      const { page, limit, userId } = req.query;
+      const startIndex = (page - 1) * limit;
+      const endIndex = page * limit;
+
+      console.log(userId);
+      let orders = await Order.find({ userId: userId });
+      if (!orders) {
+        return res.status(200).json({ data: [], message: "This user have no order exist!" });
+      }
+      console.log(orders);
+
+      let totalOrders = orders?.length;
+
+      const pagination = {
+        currentPage: page,
+        totalPages: Math.ceil(totalOrders / limit) > 0 ? Math.ceil(totalOrders / limit) : 1,
+        totalItems: totalOrders,
+        itemsPerPage: limit,
+      };
+
+      if (endIndex < totalOrders) {
+        pagination.nextPage = page + 1;
+      }
+
+      if (startIndex > 0) {
+        pagination.prevPage = page - 1;
+      }
+      console.log(1);
+      return res.status(200).json({
+        message: "Order send successful!",
+        data: orders,
+        pagination,
+      });
+    } catch (err) {
+      console.error("Lỗi khi truy xuất đơn hàng:", err);
+      return next(err);
+    }
+  },
+  changeStatus: async (req, res, next) => {
+    try {
+      const { status, orderId } = req.body;
+      let order = await Order.findById(orderId);
+      if (!order) {
+        return res.status(200).json({ data: [], message: "This user have no order exist!" });
+      }
+      console.log(status);
+      order.status = status;
+      if (status === "Đã giao" && order.paid == false) {
+        order.paid = true;
+      }
+      await order.save();
+
+      return res.status(200).json({
+        message: "Order status changed successfully!",
+      });
+    } catch (err) {
+      console.error("Lỗi khi truy xuất đơn hàng:", err);
+      return next(err);
+    }
+  },
+  delete: async (req, res, next) => {
+    try {
+      const { orderId } = req.query;
+      console.log(orderId);
+      let order = await Order.findById(orderId);
+      if (!order) {
+        return res.status(200).json({ data: [], message: "This order have no order exist!" });
+      }
+      await order.deleteOne();
+      console.log(1);
+      return res.status(200).json({
+        message: "Order delete changed successfully!",
+      });
+    } catch (err) {
+      console.error("Lỗi khi truy xuất đơn hàng:", err);
+      return next(err);
     }
   },
 };

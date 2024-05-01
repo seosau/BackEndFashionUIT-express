@@ -5,8 +5,8 @@ const HourlySaleSchema = new mongoose.Schema({
     saleDay: {
         type: Date
     },
-    slug: {
-        type: String,
+    productId: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     },
     saleCount: {

@@ -15,13 +15,13 @@ class HourlySale {
 
     async store(req, res, next) {
         try {
-            const { slug, saleHour, saleDay, discountPercent } = req.body;
+            const { productId, saleHour, saleDay, discountPercent } = req.body;
 
-            const existedSale = await hourlySale.findOne({ slug, saleHour, saleDay: new Date(saleDay) })
+            const existedSale = await hourlySale.findOne({ productId, saleHour, saleDay: new Date(saleDay) })
             if (existedSale) {
                 return res.status(400).json({error: "Đã tồn tại"})
             }
-            const newSale = await new hourlySale({ slug, saleHour, saleDay: new Date(saleDay), discountPercent })
+            const newSale = await new hourlySale({ productId: productId, saleHour, saleDay: new Date(saleDay), discountPercent })
             
             newSale
                 .save()
