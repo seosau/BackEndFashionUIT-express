@@ -19,9 +19,10 @@ const orderSchema = new Schema(
     },
     paymentMethod: {
       type: String,
+      default: "Chờ xác nhận",
     },
     status: {
-      type: Boolean,
+      type: String,
     },
     products: [
       {
