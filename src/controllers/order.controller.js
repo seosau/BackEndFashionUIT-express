@@ -1,7 +1,7 @@
 const Order = require("../models/order.model.js");
 const User = require("../models/user.model.js");
 const Product = require("../models/product.model.js");
-
+const HourlySale = require("../models/hourlySale.model.js");
 const CartController = require("./cart.controller.js");
 const cartModel = require("../models/cart.model");
 const moment = require("moment");
@@ -41,10 +41,31 @@ module.exports = {
       }
 
       for (var i = 0; i < orderInfo.products.length; i++) {
+        console.log(1);
+        const currentDate = new Date();
+        const currentDay = currentDate.getDate();
+        const currentMonth = currentDate.getMonth() + 1;
+        const currentYear = currentDate.getFullYear();
+        const currentDateString = `${currentYear}-${currentMonth < 10 ? "0" + currentMonth : currentMonth}-${currentDay < 10 ? "0" + currentDay : currentDay}`;
+        console.log(2);
         const productId = orderInfo.products[i].productId;
         const color = orderInfo.products[i].color;
         const size = orderInfo.products[i].size;
+        console.log(productId);
         const product = await Product.findOne({ _id: productId });
+        const hourlySales = await HourlySale.find({ productId: "66233ca60c27fe410480f1c9" });
+        console.log(hourlySales);
+        hourlySales?.forEach((hourlySale, index) => {
+          if (currentDateString === hourlySale.saleDay.substring(0, 10)) {
+            console.log(hourlySales);
+            console.log("Hai ngày là giống nhau.");
+          } else {
+            console.log("Hai ngày không giống nhau.");
+            console.log(hourlySales);
+          }
+        });
+
+        console.log(a);
         product.stock.forEach((item, index) => {
           if (item.color === color && item.size === size) {
             product.stock[index] = { ...product.stock[index], quantity: product.stock[index].quantity - orderInfo.products[i].quantity };
