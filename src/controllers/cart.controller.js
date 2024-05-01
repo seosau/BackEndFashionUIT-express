@@ -143,6 +143,37 @@ class CartController {
     }
   }
 
+  async deleteMany(req, res, next) {
+    try {
+      const data = req.body;
+      const userId = req._id;
+
+      const existingCart = await cartModel.findOne({ userId: userId });
+
+      for (let item of data) {
+        const indexProduct = existingCart.products.findIndex((product) => product.productId.toString() === item.productId.toString() && product.size === item.size && product.color === item.color);
+
+        existingCart.products.splice(indexProduct, 1);
+      }
+
+      existingCart
+        .save()
+        .then(() => {
+          res.status(200).json({
+            message: "Đã xóa sản phẩm khỏi giỏ hàng",
+            quantity: existingCart.products.length,
+          });
+        })
+        .catch((err) => {
+          console.error("Đã có lỗi khi xóa khỏi giỏ ", err);
+          return res.status(500).json({ error: "Đã xảy ra lỗi khi xóa khỏi giỏ" });
+        });
+    } catch (err) {
+      console.error("Đã có lỗi khi xóa khỏi giỏ ", err);
+      return res.status(500).json({ error: "Đã xảy ra lỗi khi xóa khỏi giỏ" });
+    }
+  }
+
   async updateQuantity(req, res, next) {
     const { productId, color, size, quantity } = req.body;
     const userId = req._id;
