@@ -50,6 +50,28 @@ class AccountController {
       res.status(500).json({ error: "Xoá tài khoản thất bại" });
     }
   }
+  async changeRole(req, res) {
+    try {
+      const { userId, role } = req.body;
+      const user = await User.findOne({ _id: userId });
+      if (!user) {
+        return res.status(404).json({ message: "This user does not exist" });
+      }
+      if (role === "admin") {
+        user.isAdmin = true;
+      } else {
+        user.isAdmin = false;
+      }
+      await user.save();
+      return res.status(200).json({
+        message: "Role change successful!",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: "An error occurs while adding address. Please try again later!",
+      });
+    }
+  }
 }
 
 module.exports = new AccountController();
