@@ -4,9 +4,9 @@ const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const path = require("path");
 const bcrypt = require("bcryptjs");
-const cookieParser = require("cookie-parser");
+
 const { verificationEmail, otpEmail } = require("../utils/emailTemplate");
-const { log } = require("console");
+
 const sendVerificationEmail = async (email, verificationToken) => {
   // Create a Nodemailer transporter
   const transporter = nodemailer.createTransport({

@@ -5,6 +5,8 @@ const BlogController = require("../controllers/blog.controller");
 const AccountController = require("../controllers/account.controller");
 const OrderController = require("../controllers/order.controller");
 
+const hourlySaleController = require("../controllers/hourlySale.controller");
+const DashboardController = require("../controllers/dashboard.controller");
 const { isAdmin } = require("../middlewares/isAdmin");
 // Route Product
 router.post("/product/store", isAdmin, ProductController.store);
@@ -33,5 +35,8 @@ router.get("/orders", isAdmin, OrderController.index);
 router.get("/orders/search-by-user", isAdmin, OrderController.getByUserId);
 router.post("/orders/change-status", isAdmin, OrderController.changeStatus);
 router.delete("/orders/delete", isAdmin, OrderController.delete);
-
+//
+router.post("/sale/add", isAdmin, hourlySaleController.store);
+// Route dashboard
+router.get("/dashboard", DashboardController.index.bind(DashboardController));
 module.exports = router;
