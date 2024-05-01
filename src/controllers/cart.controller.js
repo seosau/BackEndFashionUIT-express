@@ -10,12 +10,12 @@ class CartController {
             products: cartInfo.products,
             quantity: cartInfo.products.length,
           });
+        } else {
+          res.status(200).json({
+            totalPrice: 0,
+            quantity: 0,
+          });
         }
-      } else {
-        res.status(200).json({
-          totalPrice: 0,
-          quantity: 0,
-        });
       }
     } catch (err) {
       console.error("Đã có lỗi xảy ra ", err);

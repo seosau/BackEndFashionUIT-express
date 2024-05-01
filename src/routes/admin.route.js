@@ -26,9 +26,12 @@ router.get("/accounts", isAdmin, AccountController.index);
 router.get("/account/search/:keyword", isAdmin, AccountController.searchAccount);
 router.delete("/account/delete/all", isAdmin, AccountController.deleteSelectedAccounts);
 router.delete("/account/delete/:email", isAdmin, AccountController.delete);
+router.post("/accounts/change-role", isAdmin, AccountController.changeRole);
+
 //Router order
 router.get("/orders", isAdmin, OrderController.index);
 router.get("/orders/search-by-user", isAdmin, OrderController.getByUserId);
 router.post("/orders/change-status", isAdmin, OrderController.changeStatus);
 router.delete("/orders/delete", isAdmin, OrderController.delete);
+
 module.exports = router;
