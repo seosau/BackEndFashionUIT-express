@@ -160,10 +160,11 @@ class CartController {
   }
 
   async updateQuantity(req, res, next) {
-    const { productId, color, size, quantity } = req.body;
-    const userId = req._id;
+    console.log(1);
+    // const { productId, color, size, quantity } = req.body;
+    // const userId = req._id;
 
-    const existingCart = await cartModel.findOne({ userId: userId });
+    // const existingCart = await cartModel.findOne({ userId: userId });
 
     const indexProduct = existingCart.products.findIndex(
       (product) =>
