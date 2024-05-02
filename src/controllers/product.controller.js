@@ -20,7 +20,10 @@ class ProductController {
           $or: [
             { name: regex },
             { slug: regex },
+            { "category.categoryType": regex }, 
             { "category.categoryDetail": regex }, 
+            { "category.sex": regex }, 
+
           ],
         })
           .skip(startIndex)
@@ -30,6 +33,9 @@ class ProductController {
             { name: regex },
             { slug: regex },
             { "category.categoryDetail": regex }, 
+            { "category.categoryType": regex }, 
+            { "category.sex": regex }, 
+
           ],
         });
       } else {
