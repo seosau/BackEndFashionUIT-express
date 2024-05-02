@@ -170,7 +170,7 @@ class DashboardController {
 
       // Calculate the percentage growth compared to the previous week
       // For simplicity, let's assume we have data for 2 weeks
-      const previousWeekTotal = 20; // Example previous week total
+      const previousWeekTotal = 100; // Example previous week total
       const percentageGrowth =
         ((totalProducts - previousWeekTotal) / previousWeekTotal) * 100;
 
@@ -221,7 +221,7 @@ class DashboardController {
 
       // Calculate the percentage growth compared to the previous week
       // For simplicity, let's assume we have data for 2 weeks
-      const previousWeekTotalRevenue = 20000; // Example previous week total revenue
+      const previousWeekTotalRevenue = 50000; // Example previous week total revenue
       const percentageGrowth =
         ((totalRevenue - previousWeekTotalRevenue) / previousWeekTotalRevenue) *
         100;
