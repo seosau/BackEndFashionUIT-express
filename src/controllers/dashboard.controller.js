@@ -235,7 +235,7 @@ class DashboardController {
       // Return the result
       return {
         number:
-          totalRevenue.toLocaleString("en-US").replace(/,/g, ".") + ".000đ",
+          (totalRevenue*1000).toLocaleString("de-DE") + "đ",
         percentage: Math.round(percentageGrowth),
         chartData: chartData,
       };
