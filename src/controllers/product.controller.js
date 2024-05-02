@@ -19,10 +19,8 @@ class ProductController {
         products = await Product.find({
           $or: [
             { name: regex },
-            { description: regex },
             { slug: regex },
-            { shortDesc: regex },
-            { sex: regex },
+            { "category.categoryDetail": regex }, 
           ],
         })
           .skip(startIndex)
@@ -30,10 +28,8 @@ class ProductController {
         totalProducts = await Product.countDocuments({
           $or: [
             { name: regex },
-            { description: regex },
             { slug: regex },
-            { shortDesc: regex },
-            { sex: regex },
+            { "category.categoryDetail": regex }, 
           ],
         });
       } else {
