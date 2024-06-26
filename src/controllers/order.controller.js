@@ -33,6 +33,7 @@ module.exports = {
       const { orderInfo } = req.body;
       const newOrder = new Order(orderInfo);
       newOrder.userId = userId;
+      newOrder.status = "Chờ xác nhận";
       var existingCart = await cartModel.findOne({ userId: userId });
       if (!existingCart) {
         return res.status(404).json({
@@ -55,31 +56,40 @@ module.exports = {
             currentDate.getUTCHours() + 7 < hourlySale.saleHour + 6 &&
             currentDate.getUTCHours() + 7 >= hourlySale.saleHour
           ) {
-            hourlySale.saleCount = hourlySale.saleCount + orderInfo.products[i].quantity;
+            hourlySale.saleCount =
+              hourlySale.saleCount + orderInfo.products[i].quantity;
             hourlySale.save();
           }
         });
 
         product.stock.forEach((item, index) => {
           if (item.color === color && item.size === size) {
-            product.stock[index] = { ...product.stock[index], quantity: product.stock[index].quantity - orderInfo.products[i].quantity };
+            product.stock[index] = {
+              ...product.stock[index],
+              quantity:
+                product.stock[index].quantity - orderInfo.products[i].quantity,
+            };
           }
         });
         product.sold = product.sold + orderInfo.products[i].quantity;
         await product.save();
-        const indexProduct = existingCart.products.findIndex((product) => product.productId.toString() === productId.toString() && product.size === size && product.color === color);
+        const indexProduct = existingCart.products.findIndex(
+          (product) =>
+            product.productId.toString() === productId.toString() &&
+            product.size === size &&
+            product.color === color
+        );
         existingCart.products.splice(indexProduct, 1);
       }
 
       await existingCart.save();
       newOrder.expireAt = null;
       await newOrder.save();
-      return res.status(200).json({
-        message: "Order created successful!",
-      });
+      return res.status(200).json(newOrder);
     } catch (error) {
       return res.status(500).json({
-        message: "An error occurs while creating order. Please try again later!",
+        message:
+          "An error occurs while creating order. Please try again later!",
       });
     }
   },
@@ -93,14 +103,14 @@ module.exports = {
       }
       const newOrder = new Order(orderInfo);
       newOrder.userId = userId;
-
-      var existingCart = await cartModel.findOne({ userId: userId });
+      newOrder.status = "Chờ xác nhận";
+      const existingCart = await cartModel.findOne({ userId: userId });
       if (!existingCart) {
         return res.status(404).json({
           message: "Cart not exist!",
         });
       }
-      for (var i = 0; i < orderInfo.products.length; i++) {
+      for (let i = 0; i < orderInfo.products.length; i++) {
         const currentDate = new Date();
         const productId = orderInfo.products[i].productId;
         const color = orderInfo.products[i].color;
@@ -115,7 +125,8 @@ module.exports = {
             currentDate.getUTCHours() + 7 < hourlySale.saleHour + 6 &&
             currentDate.getUTCHours() + 7 >= hourlySale.saleHour
           ) {
-            hourlySale.saleCount = hourlySale.saleCount + orderInfo.products[i].quantity;
+            hourlySale.saleCount =
+              hourlySale.saleCount + orderInfo.products[i].quantity;
 
             hourlySale.save();
           }
@@ -123,7 +134,12 @@ module.exports = {
         product.sold = product.sold + orderInfo.products[i].quantity;
         await product.save();
 
-        const indexProduct = existingCart.products.findIndex((product) => product.productId.toString() === productId.toString() && product.size === size && product.color === color);
+        const indexProduct = existingCart.products.findIndex(
+          (product) =>
+            product.productId.toString() === productId.toString() &&
+            product.size === size &&
+            product.color === color
+        );
         existingCart.products.splice(indexProduct, 1);
       }
 
@@ -132,7 +148,11 @@ module.exports = {
       process.env.TZ = "Asia/Ho_Chi_Minh";
       let date = new Date();
       let createDate = moment(date).format("YYYYMMDDHHmmss");
-      let ipAddr = req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
+      let ipAddr =
+        req.headers["x-forwarded-for"] ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.connection.socket.remoteAddress;
       let tmnCode = config.vnp_TmnCode;
       let secretKey = config.vnp_HashSecret;
       let vnpUrl = config.vnp_Url;
@@ -169,13 +189,15 @@ module.exports = {
       vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
       await existingCart.save();
       await newOrder.save();
-      res.status(200).json({
+      res.status(201).json({
+        newOrder,
         message: "Order created successful!",
         vnpUrl,
       });
     } catch (error) {
       return res.status(500).json({
-        message: "An error occurs while creating order. Please try again later!",
+        message:
+          "An error occurs while creating order. Please try again later!",
       });
     }
   },
@@ -206,20 +228,27 @@ module.exports = {
           order.paid = true;
           delete order.expireAt;
           order.expireAt = null;
+          order.status = "Chờ xác nhận";
           await order.save();
           return res.status(200).json({
+            order,
             message: "Order created successful!",
             status: "00",
           });
         } else {
-          return res.status(200).json({ status: "11", Message: "Fail checksum" });
+          return res
+            .status(200)
+            .json({ status: "11", Message: "Fail checksum" });
         }
       } else {
-        return res.status(200).json({ status: params.vnp_ResponseCode, Message: "Fail checksum" });
+        return res
+          .status(200)
+          .json({ status: params.vnp_ResponseCode, Message: "Fail checksum" });
       }
     } catch (error) {
       return res.status(500).json({
-        message: "An error occurs while creating order. Please try again later!",
+        message:
+          "An error occurs while creating order. Please try again later!",
       });
     }
   },
@@ -237,7 +266,11 @@ module.exports = {
       process.env.TZ = "Asia/Ho_Chi_Minh";
       let date = new Date();
       let createDate = moment(date).format("YYYYMMDDHHmmss");
-      let ipAddr = req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
+      let ipAddr =
+        req.headers["x-forwarded-for"] ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.connection.socket.remoteAddress;
       let tmnCode = config.vnp_TmnCode;
       let secretKey = config.vnp_HashSecret;
       let vnpUrl = config.vnp_Url;
@@ -278,7 +311,8 @@ module.exports = {
       });
     } catch (error) {
       return res.status(500).json({
-        message: "An error occurs while creating order. Please try again later!",
+        message:
+          "An error occurs while creating order. Please try again later!",
       });
     }
   },
@@ -287,7 +321,9 @@ module.exports = {
       const userId = req._id;
       const orders = await Order.find({ userId: userId });
       if (!orders) {
-        res.status(200).json({ orders: [], message: "This user have no order!" });
+        res
+          .status(200)
+          .json({ orders: [], message: "This user have no order!" });
       }
       return res.status(200).json({
         message: "Orders send successful!",
@@ -325,12 +361,18 @@ module.exports = {
       let orders;
       let totalOrders;
 
-      orders = await Order.find({}).skip(startIndex).limit(limit);
+      orders = await Order.find({})
+        .sort({ createdAt: -1 })
+        .skip(startIndex)
+        .limit(limit);
       totalOrders = await Order.countDocuments();
 
       const pagination = {
         currentPage: page,
-        totalPages: Math.ceil(totalOrders / limit) > 0 ? Math.ceil(totalOrders / limit) : 1,
+        totalPages:
+          Math.ceil(totalOrders / limit) > 0
+            ? Math.ceil(totalOrders / limit)
+            : 1,
         totalItems: totalOrders,
         itemsPerPage: limit,
       };
@@ -358,7 +400,9 @@ module.exports = {
       console.log(userId);
       let orders = await Order.find({ userId: userId });
       if (!orders) {
-        return res.status(200).json({ data: [], message: "This user have no order exist!" });
+        return res
+          .status(200)
+          .json({ data: [], message: "This user have no order exist!" });
       }
       console.log(orders);
 
@@ -366,7 +410,10 @@ module.exports = {
 
       const pagination = {
         currentPage: page,
-        totalPages: Math.ceil(totalOrders / limit) > 0 ? Math.ceil(totalOrders / limit) : 1,
+        totalPages:
+          Math.ceil(totalOrders / limit) > 0
+            ? Math.ceil(totalOrders / limit)
+            : 1,
         totalItems: totalOrders,
         itemsPerPage: limit,
       };
@@ -394,7 +441,9 @@ module.exports = {
       const { status, orderId } = req.body;
       let order = await Order.findById(orderId);
       if (!order) {
-        return res.status(200).json({ data: [], message: "This user have no order exist!" });
+        return res
+          .status(200)
+          .json({ data: [], message: "This user have no order exist!" });
       }
       console.log(status);
       order.status = status;
@@ -417,7 +466,9 @@ module.exports = {
       console.log(orderId);
       let order = await Order.findById(orderId);
       if (!order) {
-        return res.status(200).json({ data: [], message: "This order have no order exist!" });
+        return res
+          .status(200)
+          .json({ data: [], message: "This order have no order exist!" });
       }
       await order.deleteOne();
       console.log(1);
